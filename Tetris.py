@@ -1,7 +1,6 @@
 import pygame
 import time
-import math
-
+import random
 class Tetromino:
     def __init__(self):
         self.shape=[[0 for i in range(3)] for i in range(3)]
@@ -16,7 +15,7 @@ class Tetromino:
         rotated = [[0 for i in range(size)] for i in range(size)]
         for i in range(size):
             for j in range(size):
-                rotated[i][j] = self.shape[j][size-1-i]
+                rotated[i][j] = self.shape[size-1-j][i]
         self.shape=rotated
 
     def __kick__(self,board,direction):
@@ -24,8 +23,8 @@ class Tetromino:
 
     def freezePiece(self,tetris):
         board=tetris.board
-        for i in range(4):
-            for j in range(4):
+        for i in range(len(self.shape)):
+            for j in range(len(self.shape[0])):
                 if self.shape[i][j]:
                     board[i+self.offSetY][j+self.offSetX]=self.shape[i][j]
         
@@ -100,13 +99,83 @@ class Tetromino:
     
         
 
-class Tetromino1(Tetromino):
+class TetrominoI(Tetromino):
     def __init__(self):
         super().__init__()
         self.shape = [[0 for x in range(4)] for x in range(4)]
         self.color=(0,200,0)
         for i in range(4):
-            self.shape[i][1] = 1
+            self.shape[1][i] = "I"
+
+
+class TetrominoJ(Tetromino):
+    def __init__(self):
+        super().__init__()
+        
+        self.color = (100, 0, 200)
+        self.shape[0][0]="J"
+        for i in range(3):
+            self.shape[1][i] = "J"
+
+
+class TetrominoL(Tetromino):
+    def __init__(self):
+        super().__init__()
+
+        self.color = (100, 0, 200)
+        self.shape[0][2] = "L"
+        for i in range(3):
+            self.shape[1][i] = "L"
+
+
+class TetrominoO(Tetromino):
+    def __init__(self):
+        super().__init__()
+        self.color = (100, 0, 200)
+        self.shape[0][1] = "O"
+        self.shape[0][2] = "O"
+        self.shape[1][1] = "O"
+        self.shape[1][2] = "O"
+
+    def rotate(self):
+        pass
+
+
+class TetrominoS(Tetromino):
+    def __init__(self):
+        super().__init__()
+
+        self.color = (100, 0, 200)
+        self.shape[0][1] = "S"
+        self.shape[0][2] = "S"
+        self.shape[1][0] = "S"
+        self.shape[1][1] = "S"
+
+
+class TetrominoZ(Tetromino):
+    def __init__(self):
+        super().__init__()
+
+        self.color = (100, 0, 200)
+        self.shape[0][0] = "Z"
+        self.shape[0][1] = "Z"
+        self.shape[1][1] = "Z"
+        self.shape[1][2] = "Z"
+
+
+class TetrominoT(Tetromino):
+    def __init__(self):
+        super().__init__()
+
+        self.color = (100, 0, 200)
+        self.shape[0][1] = "T"
+        for i in range(3):
+            self.shape[1][i] = "T"
+        
+
+        
+
+
 
 
 
@@ -115,10 +184,10 @@ class Tetris:
         pygame.init()
         self.screen=pygame.display.set_mode((1000, 800))
         pygame.display.set_caption("Tetris")
-        self.tetromino=Tetromino1()
-        self.displayTetromino=Tetromino1()
-        self.displayTetromino.displayPiece()
-        self.drawTetromino(self.displayTetromino)
+        self.tetromino=self.newTetromino(random.randint(1,7))
+        self.nextTetromino = self.newTetromino(random.randint(1, 7))
+        self.nextTetromino.displayPiece()
+        self.drawTetromino(self.nextTetromino)
         self.running=True
         self.board=[[0 for x in range(10)] for x in range(40)]
         self.speed=1.0
@@ -131,6 +200,22 @@ class Tetris:
     
     def color(tetrominoType):
         pass
+
+    def newTetromino(self,id):
+        if id==1:
+            return TetrominoI()
+        elif id==2:
+            return TetrominoJ()
+        elif id==3:
+            return TetrominoL()
+        elif id==4:
+            return TetrominoO()
+        elif id == 5:
+            return TetrominoS()
+        elif id==6:
+            return TetrominoZ()
+        elif id==7:
+            return TetrominoT()
 
     def freezePiece(self,tetromino):
         #probably better to use this one so that it can call checkRows and clearRow
@@ -165,7 +250,7 @@ class Tetris:
             self.score+=1200
         
     def drawScore(self):
-        font=pygame.font.SysFont('bold', 20)
+        font=pygame.font.SysFont('bold', 30)
 
         surface = font.render(str(self.score), 1, (255,255,255))
 
@@ -202,6 +287,7 @@ class Tetris:
     def drawBoard(self):
         self.screen.fill((0, 0, 0))
         self.drawTetromino(self.tetromino)
+        self.drawTetromino(self.nextTetromino)
         self.drawScore()
         for i in range(19,40):
             for j in range(10):
