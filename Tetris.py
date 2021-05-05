@@ -7,7 +7,7 @@ import random
 class Tetromino:
     def __init__(self):
         self.shape=[[0 for i in range(3)] for i in range(3)]
-        self.offSetX=0
+        self.offSetX=3
         self.offSetY=19
         self.color=None
         self.lastAction=None #set when taking an action
@@ -22,21 +22,15 @@ class Tetromino:
             for j in range(size):
                 rotated[i][j] = self.shape[size-1-j][i]
         self.shape=rotated
-
-    def freezePiece(self,tetris):
-        board=tetris.board
-        for i in range(len(self.shape)):
-            for j in range(len(self.shape[0])):
-                if self.shape[i][j]:
-                    board[i+self.offSetY][j+self.offSetX]=self.shape[i][j]
         
     def displayPiece(self):
         self.offSetX=15
-        self.offsetY=23
+        self.offsetY=20
 
     def boardPiece(self):
-        self.offSetX=0
-        self.offSetY=19          
+        self.offSetX=3
+        self.offSetY=19 
+
 
     def action(self, event,tetris):
         self.lastAction=event
@@ -51,7 +45,7 @@ class Tetromino:
         elif event==pygame.K_z:
             self.rotate()
             if self.collision(tetris.board):
-                self.kick(tetris.board)
+                self.kick(tetris)
 
         if self.collision(tetris.board):
             self.undoAction(event)
@@ -78,7 +72,6 @@ class Tetromino:
         self.offSetY+=1
         if self.collision(board):
             self.moveUp()
-            #self.freezePiece(tetris)
             tetris.freezePiece(self)
     
     def drop(self, tetris):
@@ -100,7 +93,8 @@ class Tetromino:
 
         return False
     
-    def kick(self,board):
+    def kick(self,tetris):
+        board=tetris.board
         self.moveRight()
         if self.collision(board):
             self.moveLeft()
@@ -113,7 +107,7 @@ class Tetromino:
             return
         self.moveUp()
         if self.collision(board):
-            self.moveDown()
+            self.offSetY+=1
         else:
             return
     
@@ -123,9 +117,41 @@ class TetrominoI(Tetromino):
     def __init__(self):
         super().__init__()
         self.shape = [[0 for x in range(4)] for x in range(4)]
-        self.color=(0,200,0)
+        self.color=(20,20,200)
         for i in range(4):
             self.shape[1][i] = "I"
+
+    def kick(self, tetris):
+        board = tetris.board
+        self.moveRight()
+        if self.collision(board):
+            self.moveRight()
+            if self.collision(board):
+                self.moveLeft()
+                self.moveLeft()
+            else:
+                return
+        else:
+            return
+        self.moveLeft()
+        if self.collision(board):
+            self.moveLeft()
+            if self.collision(board):
+                self.moveRight()
+                self.moveRight()
+            else:
+                return
+        else:
+            return
+        self.moveUp()
+        if self.collision(board):
+            self.moveUp()
+            if self.collision(board):
+                self.offSetY+=2
+            else:
+                return
+        else:
+            return
 
     
 
@@ -134,7 +160,7 @@ class TetrominoJ(Tetromino):
     def __init__(self):
         super().__init__()
         
-        self.color = (100, 0, 200)
+        self.color = (100, 100, 0)
         self.shape[0][0]="J"
         for i in range(3):
             self.shape[1][i] = "J"
@@ -144,7 +170,7 @@ class TetrominoL(Tetromino):
     def __init__(self):
         super().__init__()
 
-        self.color = (100, 0, 200)
+        self.color = (0, 200, 0)
         self.shape[0][2] = "L"
         for i in range(3):
             self.shape[1][i] = "L"
@@ -153,7 +179,7 @@ class TetrominoL(Tetromino):
 class TetrominoO(Tetromino):
     def __init__(self):
         super().__init__()
-        self.color = (100, 0, 200)
+        self.color = (100, 200, 200)
         self.shape[0][1] = "O"
         self.shape[0][2] = "O"
         self.shape[1][1] = "O"
@@ -167,7 +193,7 @@ class TetrominoS(Tetromino):
     def __init__(self):
         super().__init__()
 
-        self.color = (100, 0, 200)
+        self.color = (200, 50, 0)
         self.shape[0][1] = "S"
         self.shape[0][2] = "S"
         self.shape[1][0] = "S"
@@ -178,7 +204,7 @@ class TetrominoZ(Tetromino):
     def __init__(self):
         super().__init__()
 
-        self.color = (100, 0, 200)
+        self.color = (50, 200, 50)
         self.shape[0][0] = "Z"
         self.shape[0][1] = "Z"
         self.shape[1][1] = "Z"
@@ -189,7 +215,7 @@ class TetrominoT(Tetromino):
     def __init__(self):
         super().__init__()
 
-        self.color = (100, 0, 200)
+        self.color = (0, 100, 200)
         self.shape[0][1] = "T"
         for i in range(3):
             self.shape[1][i] = "T"
@@ -217,28 +243,17 @@ class Tetris:
 
         self.score=0
 
+        self.TetrominoColors={"I":TetrominoI().color,"J":TetrominoJ().color,"L":TetrominoL().color,
+            "O":TetrominoO().color,"S":TetrominoS().color,"Z":TetrominoZ().color,"T":TetrominoT().color}
+
     def __del__(self):
         pygame.quit()
 
     def start(self):
         pass
-    
-    def color(self,tetrominoType):
-        if tetrominoType=="I":
-            return (0, 200, 0)
-        elif tetrominoType=="J":
-            return TetrominoJ().color
-        elif tetrominoType=="L":
-            return TetrominoL().color
-        elif tetrominoType=="O":
-            return TetrominoO().color
-        elif tetrominoType=="S":
-            return TetrominoS().color
-        elif tetrominoType=="Z":
-            return TetrominoZ().color
-        elif tetrominoType=="T":
-            return TetrominoT().color
 
+    def holdPiece(self):
+        pass
 
     def newTetromino(self,id):
         if id==1:
@@ -257,7 +272,6 @@ class Tetris:
             return TetrominoT()
 
     def freezePiece(self,tetromino):
-        #probably better to use this one so that it can call checkRows and clearRow
         for i in range(len(tetromino.shape)):
             for j in range(len(tetromino.shape)):
                 if tetromino.shape[i][j]:
@@ -265,6 +279,9 @@ class Tetris:
                     self.board[i+tetromino.offSetY][j+tetromino.offSetX] = tetromino.shape[i][j]
         self.tetromino=self.nextTetromino
         self.tetromino.boardPiece()
+        if self.tetromino.collision(self.board):
+            self.running=False
+
         print(self.tetromino.offSetX,self.tetromino.offSetY)
         self.nextTetromino=self.newTetromino(random.randint(1,7))
         self.nextTetromino.displayPiece()
@@ -298,7 +315,7 @@ class Tetris:
     def drawScore(self):
         font=pygame.font.SysFont('bold', 30)
 
-        surface = font.render(str(self.score), 1, (255,255,255))
+        surface = font.render("Score: "+str(self.score), 1, (255,255,255))
 
         self.screen.blit(surface,(500,200))
 
@@ -309,6 +326,9 @@ class Tetris:
             return True
         else:
             return False
+
+    def gameSpeed(self):
+        self.speed=max(0.1, min(1, 1000/(self.score+1)))
 
     def clearRow(self,index):
         for i in range(0,index-1):
@@ -341,14 +361,14 @@ class Tetris:
         for i in range(19,40):
             for j in range(10):
                 if self.board[i][j]:
-                    self.drawRect(j,i-19,color=self.color(self.board[i][j]))
+                    self.drawRect(j,i-19,color=self.TetrominoColors[self.board[i][j]])
         
     
     def drawTetromino(self,tetromino):
         for i in range(len(tetromino.shape)):
             for j in range(len(tetromino.shape[0])):
-                if tetromino.shape[i][j] and i+tetromino.offSetY>19:
-
+                if tetromino.shape[i][j] and (i+tetromino.offSetY > 19 or j+tetromino.offSetX>10):
+                    
                     self.drawRect(j+tetromino.offSetX, i+tetromino.offSetY-19,color=tetromino.color)
 
     def unDrawTetromino(self,tetromino):
@@ -372,6 +392,7 @@ def main():
                     
         if tetris.gameTick():
             tetris.tetromino.moveDown(tetris)
+            tetris.gameSpeed()
         tetris.drawBoard()
         pygame.display.update()
 
